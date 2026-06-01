@@ -387,7 +387,7 @@ async function handleDeleteNote(noteId) {
 
 // Open Modal
 function openEditModal(noteId) {
-  const note = state.notes.find(n => n.id === noteId);
+  const note = state.notes.find(n => n.id == noteId);
   if (!note) return;
 
   document.getElementById('edit-note-id').value = note.id;
