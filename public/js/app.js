@@ -287,7 +287,9 @@ async function handleCreateNote(event) {
   const category = document.getElementById('note-category').value;
   const content = document.getElementById('note-content').value;
   const isPinned = document.getElementById('note-pinned').checked;
-  const color = document.querySelector('input[name="note-color"]:checked').value;
+  
+  const colorInput = document.querySelector('input[name="note-color"]:checked');
+  const color = colorInput ? colorInput.value : '#8B5CF6';
   
   // Parse tags from input (comma separated)
   const tagsInput = document.getElementById('note-tags').value;
@@ -395,19 +397,28 @@ function openEditModal(noteId) {
   document.getElementById('edit-note-pinned').checked = note.isPinned;
   document.getElementById('edit-note-tags').value = note.tags.join(', ');
 
-  // Select color in modal picker
-  const radio = editModal.querySelector(`input[name="edit-note-color"][value="${note.color}"]`);
-  if (radio) {
-    radio.checked = true;
-    const colorOptions = editModal.querySelectorAll('.color-option');
-    colorOptions.forEach(opt => {
-      const optVal = opt.querySelector('input').value;
-      if (optVal === note.color) {
-        opt.classList.add('active');
-      } else {
-        opt.classList.remove('active');
-      }
-    });
+  // Select color in modal picker (case-insensitive check to avoid null match)
+  const colorOptions = editModal.querySelectorAll('.color-option');
+  let selectedRadio = null;
+  
+  colorOptions.forEach(opt => {
+    const radioInput = opt.querySelector('input');
+    const optVal = radioInput.value;
+    if (note.color && optVal.toLowerCase() === note.color.toLowerCase()) {
+      radioInput.checked = true;
+      opt.classList.add('active');
+      selectedRadio = radioInput;
+    } else {
+      opt.classList.remove('active');
+    }
+  });
+
+  // If no match found, fallback to first option
+  if (!selectedRadio && colorOptions.length > 0) {
+    const firstOpt = colorOptions[0];
+    const radioInput = firstOpt.querySelector('input');
+    radioInput.checked = true;
+    firstOpt.classList.add('active');
   }
 
   editModal.classList.remove('hidden');
@@ -431,7 +442,9 @@ async function handleUpdateNote(event) {
   const category = document.getElementById('edit-note-category').value;
   const content = document.getElementById('edit-note-content').value;
   const isPinned = document.getElementById('edit-note-pinned').checked;
-  const color = document.querySelector('input[name="edit-note-color"]:checked').value;
+  
+  const colorInput = document.querySelector('input[name="edit-note-color"]:checked');
+  const color = colorInput ? colorInput.value : '#8B5CF6';
   
   const tagsInput = document.getElementById('edit-note-tags').value;
   const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [];
