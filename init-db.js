@@ -1,42 +1,66 @@
 require('dotenv').config();
-const mysql = require('mysql2/promise');
+const { Client } = require('pg');
 
-async function initializeDatabase() {
-  console.log('====================================================');
-  console.log('🔄 Memulai Inisialisasi Database Otomatis...');
-  console.log('====================================================');
+async function initDb() {
+  if (!process.env.DATABASE_URL) {
+    console.error('❌ Error: DATABASE_URL tidak ditemukan di .env\n');
+    console.log('📋 Setup Supabase PostgreSQL:\n');
+    console.log('1️⃣  Buka https://app.supabase.com');
+    console.log('2️⃣  Buka project Anda\n');
+    console.log('3️⃣  Pergi ke Settings → Database\n');
+    console.log('4️⃣  Salin connection string URI\n');
+    console.log('5️⃣  Paste ke .env file:\n');
+    console.log('   DATABASE_URL=postgresql://user:password@host:port/database\n');
+    console.log('6️⃣  Jalankan: npm run dev\n');
+    process.exit(1);
+  }
 
-  const config = {
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    port: parseInt(process.env.DB_PORT) || 3306
-  };
-
-  const dbName = process.env.DB_NAME || 'aethernote';
-
-  let connection;
-  try {
-    // 1. Connect to MySQL server without specifying a database
-    connection = await mysql.createConnection(config);
-    
-    // 2. Create the database if it does not exist
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
-    console.log(`✅ Database "${dbName}" berhasil dibuat atau sudah tersedia.`);
-    
-  } catch (error) {
-    console.error('❌ Gagal terhubung ke MySQL Server.');
-    console.error(`Detail error: ${error.message}`);
-    console.log('\n👉 PANDUAN PEMECAHAN MASALAH:');
-    console.log('1. Pastikan database MySQL (XAMPP / Laragon) sudah aktif.');
-    console.log('2. Periksa kembali konfigurasi host, user, dan password di file .env.');
-    console.log('====================================================');
-    process.exit(1); // Stop execution if DB connection fails
-  } finally {
-    if (connection) {
-      await connection.end();
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
     }
+  });
+
+  try {
+    await client.connect();
+    console.log('✅ Terhubung ke Supabase PostgreSQL');
+
+    // 1. Create users table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(100) UNIQUE NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Table "users" siap');
+
+    // 2. Create notes table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS notes (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title VARCHAR(255) NOT NULL,
+        content TEXT,
+        category VARCHAR(50) DEFAULT 'Umum',
+        color_accent VARCHAR(50) DEFAULT 'violet',
+        is_pinned BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('✅ Table "notes" siap');
+
+    await client.end();
+    console.log('✅ Database initialization berhasil!\n');
+
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    process.exit(1);
   }
 }
 
-initializeDatabase();
+initDb();
