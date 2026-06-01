@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AetherNote — Workspace Catatan & Journal Premium</title>
+  <meta name="description" content="AetherNote adalah aplikasi jurnal dan catatan digital modern dengan antarmuka premium, terenkripsi aman, dan dihosting langsung di Vercel.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Ambient Background Glows -->
+  <div class="glow-bg glow-purple"></div>
+  <div class="glow-bg glow-blue"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ==========================================
+       AUTH SCREEN (LOGIN / REGISTER)
+       ========================================== -->
+  <main id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="logo">
+          <i data-lucide="feather" class="logo-icon"></i>
+          <h1>AetherNote</h1>
+        </div>
+        <p class="tagline">Ruang kreatif untuk menangkap ide, rencana, dan jurnal harian Anda.</p>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="auth-tabs">
+        <button id="tab-login" class="tab-btn active" onclick="switchAuthTab('login')">Masuk</button>
+        <button id="tab-register" class="tab-btn" onclick="switchAuthTab('register')">Daftar</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <div class="input-wrapper">
+            <i data-lucide="mail" class="input-icon"></i>
+            <input type="email" id="login-email" placeholder="nama@email.com" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <div class="input-wrapper">
+            <i data-lucide="lock" class="input-icon"></i>
+            <input type="password" id="login-password" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="btn-login-submit">
+          <span>Masuk ke Workspace</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label for="register-name">Nama Lengkap</label>
+          <div class="input-wrapper">
+            <i data-lucide="user" class="input-icon"></i>
+            <input type="text" id="register-name" placeholder="John Doe" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <div class="input-wrapper">
+            <i data-lucide="mail" class="input-icon"></i>
+            <input type="email" id="register-email" placeholder="nama@email.com" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="register-password">Password (min. 6 karakter)</label>
+          <div class="input-wrapper">
+            <i data-lucide="lock" class="input-icon"></i>
+            <input type="password" id="register-password" placeholder="••••••••" minlength="6" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="btn-register-submit">
+          <span>Buat Akun Gratis</span>
+          <i data-lucide="sparkles"></i>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p><i data-lucide="shield-check" class="inline-icon"></i> Terkoneksi ke API Server &amp; Siap Dihosting di Vercel</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==========================================
+       DASHBOARD SCREEN (WORKSPACE)
+       ========================================== -->
+  <main id="dashboard-screen" class="dashboard-screen hidden">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="header-left">
+        <div class="logo">
+          <i data-lucide="feather" class="logo-icon"></i>
+          <span class="logo-text">AetherNote</span>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <div class="user-profile">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <div class="user-details">
+            <span class="user-name" id="profile-name">User Name</span>
+            <span class="user-email" id="profile-email">user@email.com</span>
+          </div>
+        </div>
+        <button class="btn btn-icon btn-logout" onclick="handleLogout()" title="Keluar">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Workspace Layout -->
+    <div class="workspace-container">
+      <!-- Left Sidebar: Note Form -->
+      <section class="workspace-sidebar">
+        <div class="sidebar-card">
+          <div class="card-header">
+            <h3><i data-lucide="plus-circle" class="header-icon"></i> Catatan Baru</h3>
+            <p>Tuliskan gagasan atau tugas Anda hari ini.</p>
+          </div>
+
+          <form id="note-form" onsubmit="handleCreateNote(event)">
+            <div class="form-group">
+              <label for="note-title">Judul Catatan</label>
+              <input type="text" id="note-title" placeholder="Misal: Rencana Projek Backend" required autocomplete="off">
+            </div>
+
+            <div class="form-group">
+              <label for="note-category">Kategori</label>
+              <div class="select-wrapper">
+                <i data-lucide="tag" class="select-icon"></i>
+                <select id="note-category">
+                  <option value="Umum">Umum</option>
+                  <option value="Tugas">Tugas / Projek</option>
+                  <option value="Ide">Ide Kreatif</option>
+                  <option value="Pribadi">Pribadi</option>
+                  <option value="Belanja">Belanja / List</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Pilih Aksen Warna</label>
+              <div class="color-picker-group">
+                <label class="color-option active" style="--color-theme: #8B5CF6;" title="Violet">
+                  <input type="radio" name="note-color" value="#8B5CF6" checked>
+                  <span class="color-dot"></span>
+                </label>
+                <label class="color-option" style="--color-theme: #EC4899;" title="Pink">
+                  <input type="radio" name="note-color" value="#EC4899">
+                  <span class="color-dot"></span>
+                </label>
+                <label class="color-option" style="--color-theme: #3B82F6;" title="Blue">
+                  <input type="radio" name="note-color" value="#3B82F6">
+                  <span class="color-dot"></span>
+                </label>
+                <label class="color-option" style="--color-theme: #10B981;" title="Emerald">
+                  <input type="radio" name="note-color" value="#10B981">
+                  <span class="color-dot"></span>
+                </label>
+                <label class="color-option" style="--color-theme: #F59E0B;" title="Amber">
+                  <input type="radio" name="note-color" value="#F59E0B">
+                  <span class="color-dot"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="note-tags">Tag (pisahkan dengan koma)</label>
+              <div class="input-wrapper">
+                <i data-lucide="hash" class="input-icon"></i>
+                <input type="text" id="note-tags" placeholder="kuliah, express, hosting" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="note-pinned">
+                <label for="note-pinned">
+                  <i data-lucide="pin" class="checkbox-icon"></i>
+                  Sematkan Catatan (Pin ke atas)
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="note-content">Isi Catatan / Rencana</label>
+              <textarea id="note-content" rows="6" placeholder="Tulis catatan lengkap Anda di sini..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+              <span>Simpan Catatan</span>
+              <i data-lucide="arrow-right-circle"></i>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Right Main Content: Filters + Note List -->
+      <section class="workspace-main">
+        <!-- Control Bar (Filter & Search) -->
+        <div class="control-bar">
+          <div class="search-wrapper">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="search-input" placeholder="Cari catatan berdasarkan judul atau isi..." oninput="filterNotes()">
+          </div>
+
+          <div class="filter-wrapper">
+            <span class="filter-label">Filter:</span>
+            <div class="filter-buttons">
+              <button class="filter-btn active" data-category="Semua" onclick="setCategoryFilter('Semua')">Semua</button>
+              <button class="filter-btn" data-category="Umum" onclick="setCategoryFilter('Umum')">Umum</button>
+              <button class="filter-btn" data-category="Tugas" onclick="setCategoryFilter('Tugas')">Tugas</button>
+              <button class="filter-btn" data-category="Ide" onclick="setCategoryFilter('Ide')">Ide</button>
+              <button class="filter-btn" data-category="Pribadi" onclick="setCategoryFilter('Pribadi')">Pribadi</button>
+              <button class="filter-btn" data-category="Belanja" onclick="setCategoryFilter('Belanja')">Belanja</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes Grid Workspace -->
+        <div id="notes-grid" class="notes-grid">
+          <!-- Dynamically populated note cards go here -->
+          
+          <!-- Loading State -->
+          <div class="loading-state" id="notes-loading">
+            <div class="spinner"></div>
+            <p>Sedang memuat catatan Anda...</p>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="notes-empty" class="empty-state hidden">
+          <i data-lucide="sticky-note" class="empty-icon"></i>
+          <h4>Belum Ada Catatan</h4>
+          <p>Mulai dengan menulis catatan pertama Anda di form sebelah kiri.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ==========================================
+       MODAL EDIT NOTE
+       ========================================== -->
+  <div id="edit-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i data-lucide="edit-3" class="header-icon"></i> Edit Catatan</h3>
+        <button class="btn-close-modal" onclick="closeEditModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <form id="edit-note-form" onsubmit="handleUpdateNote(event)">
+        <input type="hidden" id="edit-note-id">
+        
+        <div class="form-group">
+          <label for="edit-note-title">Judul Catatan</label>
+          <input type="text" id="edit-note-title" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="edit-note-category">Kategori</label>
+          <div class="select-wrapper">
+            <i data-lucide="tag" class="select-icon"></i>
+            <select id="edit-note-category">
+              <option value="Umum">Umum</option>
+              <option value="Tugas">Tugas / Projek</option>
+              <option value="Ide">Ide Kreatif</option>
+              <option value="Pribadi">Pribadi</option>
+              <option value="Belanja">Belanja / List</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Pilih Aksen Warna</label>
+          <div class="color-picker-group" id="edit-color-picker">
+            <label class="color-option" style="--color-theme: #8B5CF6;" title="Violet">
+              <input type="radio" name="edit-note-color" value="#8B5CF6">
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option" style="--color-theme: #EC4899;" title="Pink">
+              <input type="radio" name="edit-note-color" value="#EC4899">
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option" style="--color-theme: #3B82F6;" title="Blue">
+              <input type="radio" name="edit-note-color" value="#3B82F6">
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option" style="--color-theme: #10B981;" title="Emerald">
+              <input type="radio" name="edit-note-color" value="#10B981">
+              <span class="color-dot"></span>
+            </label>
+            <label class="color-option" style="--color-theme: #F59E0B;" title="Amber">
+              <input type="radio" name="edit-note-color" value="#F59E0B">
+              <span class="color-dot"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-note-tags">Tag (pisahkan dengan koma)</label>
+          <div class="input-wrapper">
+            <i data-lucide="hash" class="input-icon"></i>
+            <input type="text" id="edit-note-tags" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="edit-note-pinned">
+            <label for="edit-note-pinned">
+              <i data-lucide="pin" class="checkbox-icon"></i>
+              Sematkan Catatan (Pin ke atas)
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-note-content">Isi Catatan</label>
+          <textarea id="edit-note-content" rows="6" required></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">
+            <span>Simpan Perubahan</span>
+            <i data-lucide="check-circle-2"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript App Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
