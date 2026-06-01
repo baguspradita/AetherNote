@@ -48,11 +48,18 @@ async function initDb() {
         category VARCHAR(50) DEFAULT 'Umum',
         color_accent VARCHAR(50) DEFAULT 'violet',
         is_pinned BOOLEAN DEFAULT FALSE,
+        tags TEXT DEFAULT '',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
     console.log('✅ Table "notes" siap');
+
+    // Migrate tags column for existing tables
+    await client.query(`
+      ALTER TABLE notes ADD COLUMN IF NOT EXISTS tags TEXT DEFAULT '';
+    `);
+    console.log('✅ Migrasi table "notes" (tags column) siap');
 
     await client.end();
     console.log('✅ Database initialization berhasil!\n');
