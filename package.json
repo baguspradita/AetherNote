@@ -1,7 +1,7 @@
 {
   "name": "express-hosting",
   "version": "1.0.0",
-  "description": "",
+  "description": "AetherNote - Aplikasi catatan & jurnal digital premium berbasis Express.js REST API dengan PostgreSQL (Supabase), autentikasi JWT, dan frontend vanilla CSS/JS. Siap deploy di Vercel.",
   "main": "index.js",
   "scripts": {
     "start": "node init-db.js && node api/index.js",
