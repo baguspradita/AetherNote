@@ -1,4 +1,4 @@
-# AetherNote ✨
+# AetherNote 
 
 **AetherNote** adalah aplikasi catatan dan jurnal digital modern berbasis web yang memungkinkan pengguna mencatat ide, tugas, rencana, dan jurnal harian dengan antarmuka premium. Dibangun dengan arsitektur REST API menggunakan Express.js dan database PostgreSQL, siap di-deploy ke Vercel.
 
@@ -50,14 +50,14 @@ express-hosting/
 
 | Method | Endpoint | Auth | Deskripsi |
 |--------|----------|------|-----------|
-| POST | `/api/auth/register` | ❌ | Registrasi akun baru |
-| POST | `/api/auth/login` | ❌ | Login pengguna |
-| GET | `/api/auth/me` | ✅ | Verifikasi token & data user |
-| GET | `/api/notes` | ✅ | Ambil semua catatan user |
-| POST | `/api/notes` | ✅ | Buat catatan baru |
-| PUT | `/api/notes/:id` | ✅ | Update catatan |
-| DELETE | `/api/notes/:id` | ✅ | Hapus catatan |
-| GET | `/health` | ❌ | Health check server |
+| POST | `/api/auth/register` | Tidak | Registrasi akun baru |
+| POST | `/api/auth/login` | Tidak | Login pengguna |
+| GET | `/api/auth/me` | Wajib token | Verifikasi token & data user |
+| GET | `/api/notes` | Wajib token | Ambil semua catatan user |
+| POST | `/api/notes` | Wajib token | Buat catatan baru |
+| PUT | `/api/notes/:id` | Wajib token | Update catatan |
+| DELETE | `/api/notes/:id` | Wajib token | Hapus catatan |
+| GET | `/health` | Tidak | Health check server |
 
 ## Instalasi & Menjalankan Lokal
 
